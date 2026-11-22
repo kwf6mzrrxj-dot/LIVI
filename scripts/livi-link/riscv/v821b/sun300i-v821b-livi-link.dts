@@ -13,6 +13,7 @@
 	compatible = "livi,link-v821b", "allwinner,sun300i-v821b";
 
 	aliases {
+		i2c0 = &i2c0_gpio;
 		i2c1 = &i2c1;
 		spi1 = &spi1;
 	};

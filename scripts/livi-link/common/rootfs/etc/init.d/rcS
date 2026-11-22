@@ -33,16 +33,26 @@ telnetd -l /bin/sh -p 23 && echo "[livi] telnetd :23"
 /usr/bin/livi-ledd >/tmp/livi/ledd.log 2>&1 &
 echo "[livi] ledd pid=$!"
 
-# MFi coprocessor bridge. Retries in the background until the board's I2C node is there.
+# MFi coprocessor bridge. The bus number differs between boards (the LIVI
+# reference board uses twi1, an OEM dongle may put the chip on a bit-banged
+# i2c-gpio bus), so try the configured bus first and then every other adapter;
+# livi-mfid exits at once when no coprocessor answers.
 if [ -n "$MFI_I2C" ]; then
     (
         for i in $(seq 1 20); do
-            if [ -c /dev/i2c-$MFI_I2C ]; then
-                /usr/bin/livi-mfid $MFI_I2C >/tmp/livi/mfid.log 2>&1 &
-                echo "[livi] mfid pid=$! :5000 (i2c-$MFI_I2C)"
+            [ -c /dev/i2c-$MFI_I2C ] && break
+            sleep 0.5
+        done
+        for bus in $MFI_I2C $(ls /dev/i2c-* 2>/dev/null | sed 's#.*i2c-##'); do
+            [ -c /dev/i2c-$bus ] || continue
+            /usr/bin/livi-mfid $bus >/tmp/livi/mfid.log 2>&1 &
+            pid=$!
+            sleep 1
+            if kill -0 $pid 2>/dev/null; then
+                echo "[livi] mfid pid=$pid :5000 (i2c-$bus)"
+                # The first live one wins; stop the probe loop.
                 break
             fi
-            sleep 0.5
         done
     ) &
 fi

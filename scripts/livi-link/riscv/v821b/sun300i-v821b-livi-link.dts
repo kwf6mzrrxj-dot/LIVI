@@ -37,13 +37,15 @@
 		};
 	};
 
-	/* Module enable, high before the SDIO slot is scanned. */
+	/* Module enable, high before the SDIO slot is scanned.
+	 * The vendor DTB of the AUFN dongle drives wlan_regon on PD12 (gpio 3 12),
+	 * not PD11: there PD11 is wlan_hostwake.  */
 	reg_wlan: regulator-wlan {
 		compatible = "regulator-fixed";
 		regulator-name = "wlan";
 		regulator-min-microvolt = <3300000>;
 		regulator-max-microvolt = <3300000>;
-		gpio = <&pio 3 11 GPIO_ACTIVE_HIGH>;
+		gpio = <&pio 3 12 GPIO_ACTIVE_HIGH>;
 		enable-active-high;
 		startup-delay-us = <200000>;
 	};

@@ -1,7 +1,9 @@
 # V821B + AIC8800D80: what rcS and livi-radio do on this board and not on the others.
 
-# The MFi chip on twi1, the DT alias makes that /dev/i2c-1.
-MFI_I2C=1
+# The MFi chip.  The stock dongle firmware opens /dev/i2c-0 (iap2_get_config_int
+# default I2C_NUM=0, I2C_ADDR=0x22 = 7-bit 0x11); the LIVI reference board uses
+# twi1.  Probe both at boot in rcS order below.
+MFI_I2C=0
 
 # The kernel powers the module (reg_wlan, wlan_pwrseq) and finds it on the SDIO slot while booting.
 board_wifi() {
